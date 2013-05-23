@@ -97,7 +97,7 @@ createServer.createServer = createServer;
 /**
  * Auto-load bundled middleware with getters.
  * 自动读取middlevare目录里面的所有js文件
- * 已文件的名字为属性名,分别输出的connect的主对象中
+ * 以文件的名字为属性名,分别输出的connect的主对象中
  * 比如读到session.js,
  * 就就有export.session,
  * 内容为require(session.js)
