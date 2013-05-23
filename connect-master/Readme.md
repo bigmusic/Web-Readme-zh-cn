@@ -2,10 +2,11 @@
 # Connect [源repo](https://github.com/senchalabs/connect)
 
   *这是一个在connect的master分支随便zip下来,自己新建的repo.*
+
   *意在翻译注解和学习架构Connect框架,此工作并非针对Connect源码*
 
   Connect is an extensible HTTP server framework for [node](http://nodejs.org), providing high performance "plugins" known as _middleware_.
-  Connect是一个可扩展的Node.js HTTP服务器框架,提供高性能的插件,大家都称之为中间件_middleware_.
+  Connect是一个可扩展的Node.js HTTP服务器框架,提供高性能的插件,大家都称之为中间件 _middleware_.
   
  Connect is bundled with over _20_ commonly used middleware, including
  a logger, session support, cookie parser, and [more](http://senchalabs.github.com/connect). 
