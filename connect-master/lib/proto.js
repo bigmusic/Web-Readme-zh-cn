@@ -1,4 +1,3 @@
-
 /*!
  * Connect - HTTPServer
  * Copyright(c) 2010 Sencha Inc.
@@ -28,7 +27,8 @@ var env = process.env.NODE_ENV || 'development';
  * middleware, when given a value other than _/_ the middleware
  * is only effective when that segment is present in the request's
  * pathname.
- *
+ * 采用特定的路径指定运行特定的中间件,如果不指定路径,则默认为'/'
+ *  
  * For example if we were to mount a function at _/admin_, it would
  * be invoked on _/admin_, and _/admin/settings_, however it would
  * not be invoked for _/_, or _/posts_.
@@ -42,17 +42,28 @@ var env = process.env.NODE_ENV || 'development';
  *
  * If we wanted to prefix static files with _/public_, we could
  * "mount" the `static()` middleware:
+ * 例如,如果你想设定指定的路径才用到你加载的中间件,需要按照如下格式编写
  *
  *      app.use('/public', connect.static(__dirname + '/public'));
  *
  * This api is chainable, so the following is valid:
+ * 因为.use方法有return this的存在,所以可以无限链不间断:
  *
  *      connect()
  *        .use(connect.favicon())
  *        .use(connect.logger())
  *        .use(connect.static(__dirname + '/public'))
  *        .listen(3000);
- *
+ * 
+ * 注:如上例,use里面调用的中间件如connect.favicon()是运行后再返回给fn
+ *    所以,每个中间的格式为
+ *     function middlevare(arguments){
+ *         return function(req,res,next){};
+ *     };
+ *    fn就是被推入stack的内容,内容是执行中间件后返回的函数,
+ *    所以中间件在.use定义的时候会传入用户想要的参数,
+ *    而真正调用中间件的是http.createServer,作为Callback传入req,res,next
+ * 
  * @param {String|Function|Server} route, callback or server
  * @param {Function|Server} callback or server
  * @return {Server} for chaining
@@ -60,7 +71,11 @@ var env = process.env.NODE_ENV || 'development';
  */
 
 app.use = function(route, fn){
+  
   // default route to '/'
+  // 如果参数route不是字符串,
+  // 则将其作为方法为fn引用
+  // 设定route为默认路径'/'
   if ('string' != typeof route) {
     fn = route;
     route = '/';
@@ -86,6 +101,9 @@ app.use = function(route, fn){
   }
 
   // add the middleware
+  // this.stack为connect.js中createServer函数定义的数组
+  // 此处将app.use()中的参数定义的中间件推入这个数组,
+  // 以便在app.handle中遍历和调用,
   debug('use %s %s', route || '/', fn.name || 'anonymous');
   this.stack.push({ route: route, handle: fn });
 
@@ -95,15 +113,23 @@ app.use = function(route, fn){
 /**
  * Handle server requests, punting them down
  * the middleware stack.
- *
+ * 而app.handle作为http.createServer的callback遍历+逐个运行
+ * this.stack里面定义的方法
+ * 
  * @api private
  */
 
 app.handle = function(req, res, out) {
+  
+  //stack引用this.stack,作为局部作用域中使用
   var stack = this.stack
     , fqdn = ~req.url.indexOf('://')
     , removed = ''
     , slashAdded = false
+    
+    //初始化index=0,遍历stack堆栈所用,
+    //以后每一次运行next(),index都会+1
+    //直到stack[index]里不存在对象
     , index = 0;
 
   function next(err) {
@@ -182,6 +208,8 @@ app.handle = function(req, res, out) {
       var arity = layer.handle.length;
       if (err) {
         if (arity === 4) {
+          
+          //运行stack里面的对象的handle,就是用.use传入stack的对象
           layer.handle(err, req, res, next);
         } else {
           next(err);
@@ -195,6 +223,8 @@ app.handle = function(req, res, out) {
       next(e);
     }
   }
+  
+  //再次调用next(),以便遍历stack里面的所有对象
   next();
 };
 
