@@ -21,6 +21,8 @@ var EventEmitter = require('events').EventEmitter
 require('./patch');
 
 // expose createServer() as the module
+// 将createServer函数export,用户就可以调用connect()
+// 并返回一个函数对象
 
 exports = module.exports = createServer;
 
@@ -38,27 +40,30 @@ exports.mime = require('./middleware/static').mime;
 
 /**
  * Expose the prototype.
+ * 把proto引用到connect.proto
  */
 
 exports.proto = proto;
 
 /**
  * Auto-load middleware getters.
+ * 初始化一个middleware属性为一个空对象
  */
 
 exports.middleware = {};
 
 /**
  * Expose utilities.
+ * 输出utils工具集,让用户可以用到merge等等方法
  */
 
 exports.utils = utils;
 
 /**
  * Create a new connect server.
- * 如果用户使用connect(),就返回一个函数
- * 这个函数对象的属性集合为proto.js和EventEmitter的prototype
- * 继承use,set,handle等等方法
+ * 如果用户使用connect(),就返回一个函数对象
+ * 合并proto.js里export的属性方法,和EventEmitter的prototype到这个对象
+ * 包括use,set,handle等等方法
  *
  * @return {Function}
  * @api public
@@ -66,19 +71,20 @@ exports.utils = utils;
 
 function createServer() {
   
-  //此为执行connect()返回的函数对象,当原生http.createServer将其作为Callback调用时
-  //会执行proto.js里面定义的handle方法
+  //此为执行connect()返回的函数对象app,当原生http.createServer将其作为Callback调用时
+  //会执行proto.js里面定义的handle方法,同时传入req,res,next参数
   function app(req, res, next){ app.handle(req, res, next); }  
   
-  //合并proto.js输出的属性和方法和EventEmitter的prototype到app对象
+  //合并proto.js里export的属性方法,和EventEmitter的prototype到app对象
   utils.merge(app, proto);
   utils.merge(app, EventEmitter.prototype);
   
-  //初始化route为'/',stack为加载middlevare的堆栈,初始化为一个数组
+  //初始化route为'/',stack为加载middlevare的堆栈,初始化为一个数组,作为返回对象app的属性
   app.route = '/';
   app.stack = [];
   
-  //如果运行connect()的时候有参数,就用use方法把所有参数引用的middlevare放进app.stack
+  //如果运行connect()的时候有参数,就用use方法把所有参数引用的middleware放进app.stack
+  //这种方式好像已经没人用了...
   for (var i = 0; i < arguments.length; ++i) {
     app.use(arguments[i]);
   }
@@ -96,11 +102,12 @@ createServer.createServer = createServer;
 
 /**
  * Auto-load bundled middleware with getters.
- * 自动读取middlevare目录里面的所有js文件
- * 以文件的名字为属性名,分别输出的connect的主对象中
+ * 自动读取middleware目录里面的所有js文件
+ * 以文件的名字为属性名,分别export到connect这个对象
  * 比如读到session.js,
  * 就就有export.session,
  * 内容为require(session.js)
+ * 用户就可以调用connect.session了
  */
 
 fs.readdirSync(__dirname + '/middleware').forEach(function(filename){
