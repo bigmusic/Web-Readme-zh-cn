@@ -100,16 +100,16 @@ connect = function(){
 //        
 //      所以调用connect.session()时传入如{secret:'session',cookie:{maxAge:year}}的参数,
 //      可以经过中间件的逻辑代码处理后再利用闭包让返回的函数工作
-//      实际Node.js调用的是sessionReturn()并在调用时传入req,res,next参数
+//      so,实际createServer调用的是sessionReturn()并在调用时传入req,res,next参数
 //
 //  use方法会按用户的代码逻辑顺序把中间件返回的函数逐个放进stack堆栈,
 //  如果调用app.use的时候有route参数,
 //  这个堆栈中的对象会有一个route属性对应用户想用到的路由和middleware
 //  此处为伪代码省去判断route的代码
 connect.use = function(route, fn){
-    this.stack.push({ //把fn推如stack堆栈
+    this.stack.push({ //把fn放进stack堆栈
         route: route,
-        handle: fn //这个fn在这个例子里其实就是sessionReturn(req,res,next){...};
+        handle: fn //fn在这个例子里其实就是sessionReturn(req,res,next){...};
     });
     return this;//返回指针可以让.use链式调用,比如app.use(some()).use(other()).use(another())
 };
@@ -126,17 +126,20 @@ connect.use = function(route, fn){
 connect.Handle = function(req, res, out){
     var stack = this.stack,
         index = 0;
-
+        
 //此处为伪代码,在index=0开始遍历stack[index]数组,
-//注意layer.handle,此handle非彼handle,这个handle是stack这个堆栈中的对象的方法
-//我觉得这里用handle这个名字很容易混肴connect.handle,所以我把伪代码改了改
-//用connect.Handle,注意这不是构造函数,只是为了区分
+//注意layer.handle,此handle非彼Handle,这个handle是数组堆栈stack中对象的方法,
+//这些对象储存对应的路由和中间件返回函数,
+//如在这个例子就是layer.handle=stack[index].handle=sessionReturn
+//我觉得这里用handle这个名字很容易混肴connect.handle,所以我把伪代码改了
+//改用connect.Handle,注意这不是构造函数,只是为了区分
     function next(err){
         var layer;
         layer = stack[index++];
-        layer.handle(req, res, next);
+        if(!layer)return someThing; //遍历完后跳出函数
+        layer.handle(req, res, next);//这里可以之间看成sessionReturn(req,res,next);
     };
-    next();
+    next();//重新调用next()遍历堆栈stack
 };
 
 
