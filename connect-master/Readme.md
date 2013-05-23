@@ -1,14 +1,18 @@
 [![build status](https://secure.travis-ci.org/senchalabs/connect.png)](http://travis-ci.org/senchalabs/connect)
-# Connect
+# Connect [源repo](https://github.com/senchalabs/connect)
 
-  *这是一个在connect的master分支随便zip下来,自己新建的repo,意在翻译注解和架构Connect框架,此工作并非针对Connect源码*
+  *这是一个在connect的master分支随便zip下来,自己新建的repo.*
+  *意在翻译注解和学习架构Connect框架,此工作并非针对Connect源码*
 
   Connect is an extensible HTTP server framework for [node](http://nodejs.org), providing high performance "plugins" known as _middleware_.
-  Connect是一个可扩展的Node.js HTTP服务器框架
+  Connect是一个可扩展的Node.js HTTP服务器框架,提供高性能的插件,大家都称之为中间件_middleware_.
   
  Connect is bundled with over _20_ commonly used middleware, including
- a logger, session support, cookie parser, and [more](http://senchalabs.github.com/connect). Be sure to view the 2.x [documentation](http://senchalabs.github.com/connect/).
+ a logger, session support, cookie parser, and [more](http://senchalabs.github.com/connect). 
  Connet拥有超过20个middleware(中间件)
+ 
+ Be sure to view the 2.x [documentation](http://senchalabs.github.com/connect/).
+ 你可以到[这里](http://senchalabs.github.com/connect/)了解Connect 2.0的详情
  
 ```js
 var connect = require('connect')
@@ -35,19 +39,19 @@ http.createServer(app).listen(3000);
 
 ```js
 /*
- * 此为伪代码,建立一个http对象,调用createServer方法时会运行以参数传入的callback
- * 此callback是调用connect()返回的函数app
+ * 此篇幅全部为伪代码
 */
 var connect,
     app,
     http={};
-    
-//http.createServer的伪代码
+      
+//调用createServer方法时,会调用以参数传入的callback
+//此callback为调用connect()返回的函数app()
 http.createServer = function(callback){
     var req,res,next;
     //此处省去N行代码,好奇的自觉去看Node.js源码
-    //req=some,res=some,next=some;
-    callback(req,res,next);
+    //doSomething with req/res/next
+    callback(req,res,next); //可理解为app(req,res,next);
 };
 
 //调用connect()返回函数传值给app
@@ -148,53 +152,6 @@ connect.Handle = function(req, res, out){
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-## Middleware
-
-  - [csrf](http://www.senchalabs.org/connect/csrf.html)
-  - [basicAuth](http://www.senchalabs.org/connect/basicAuth.html)
-  - [bodyParser](http://www.senchalabs.org/connect/bodyParser.html)
-  - [json](http://www.senchalabs.org/connect/json.html)
-  - [multipart](http://www.senchalabs.org/connect/multipart.html)
-  - [urlencoded](http://www.senchalabs.org/connect/urlencoded.html)
-  - [cookieParser](http://www.senchalabs.org/connect/cookieParser.html)
-  - [directory](http://www.senchalabs.org/connect/directory.html)
-  - [compress](http://www.senchalabs.org/connect/compress.html)
-  - [errorHandler](http://www.senchalabs.org/connect/errorHandler.html)
-  - [favicon](http://www.senchalabs.org/connect/favicon.html)
-  - [limit](http://www.senchalabs.org/connect/limit.html)
-  - [logger](http://www.senchalabs.org/connect/logger.html)
-  - [methodOverride](http://www.senchalabs.org/connect/methodOverride.html)
-  - [query](http://www.senchalabs.org/connect/query.html)
-  - [responseTime](http://www.senchalabs.org/connect/responseTime.html)
-  - [session](http://www.senchalabs.org/connect/session.html)
-  - [static](http://www.senchalabs.org/connect/static.html)
-  - [staticCache](http://www.senchalabs.org/connect/staticCache.html)
-  - [vhost](http://www.senchalabs.org/connect/vhost.html)
-  - [subdomains](http://www.senchalabs.org/connect/subdomains.html)
-  - [cookieSession](http://www.senchalabs.org/connect/cookieSession.html)
-
-## Running Tests
-
-first:
-
-    $ npm install -d
-
-then:
-
-    $ make test
-
 ## Authors
 
  Below is the output from [git-summary](http://github.com/visionmedia/git-extras).
@@ -250,15 +207,7 @@ then:
          1	Samori Gorse            0.0%
          1	Tom Jensen              0.0%
 
-## Node Compatibility
 
-  Connect `< 1.x` is compatible with node 0.2.x
-
-
-  Connect `1.x` is compatible with node 0.4.x
-
-
-  Connect (_master_) `2.x` is compatible with node 0.6.x
 
 ## CLA
 
