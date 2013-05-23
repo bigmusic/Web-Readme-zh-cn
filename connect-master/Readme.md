@@ -54,27 +54,32 @@ http.createServer = function(callback){
 //调用createServer等待终端用户接入时,调用app函数,
 //以参数传入req,res,next
 app=connect()
+app.use(connect.session({
+    secret:'session',
+    cookie:{maxAge:year
+}));
 http.createServer(app);
 
 
 /********注意Handle和handle的不同,源码都用handle,很混肴思路******************/
+/********往下看会把proto.js里面的use和Handle简化成伪代码写出来***************/
+
 //调用connect()返回app函数,当调用app()时,实质上是运行proto.js里面的Handle方法
 //两个重要参数为route路由参数,stack则是储存中间件(middleware)的堆栈
-//堆栈stack中存放的对象,分别有route和handle,handle存的是middleware
-//而connect.Handle方法会遍历这个堆栈把中间件按顺序执行
+//堆栈stack中存放的对象,分别有route和handle属性,这个handle存的是middleware
+//而connect.Handle方法会遍历这个stack堆栈把中间件按顺序执行
 connect = function(){
     function app(req, res, next){
-        app.Handle(req, res, next);
+        app.Handle(req, res, next);//其实是connect.Handle(req,res,next);
     };
     
     //这里很重要的是调用utils.merge把proto.js里export的use和Handle函数合并到
-    //将要返回的app(),所以用户就可以用到app.use,app()调用时可以用到app.Handle
-    //下面会把proto.js里面的use和Handle简化成伪代码写出来
+    //将要返回的app(),所以用户就可以调用app.use(),app()调用时可以调用app.Handle()
     utils.merge(app, proto);
     utils.merge(app, EventEmitter.prototype);
-    app.route = '/';
-    app.stack = [];
-    return app;
+    app.route = '/'; //初始化route为'/'
+    app.stack = [];  //初始化stack中间件堆栈为一个空数组
+    return app;  //调用connect()返回app函数
 };
 
 /******************proto.js里面的伪代码简化:*****************************/
@@ -99,11 +104,11 @@ connect = function(){
 //  这个堆栈中的对象会有一个route属性对应用户想用到的路由和middleware
 //  此处为伪代码省去判断route的代码
 connect.use = function(route, fn){
-    this.stack.push({
+    this.stack.push({ //把fn推如stack堆栈
         route: route,
-        handle: fn
+        handle: fn //这个fn在这个例子里其实就是sessionReturn(req,res,next){...};
     });
-    return this;
+    return this;//返回指针可以让.use链式调用,比如app.use(some()).use(other()).use(another())
 };
 
 
@@ -130,6 +135,16 @@ connect.Handle = function(req, res, out){
     };
     next();
 };
+
+
+
+/*
+ *当然,connect.js会用require('fs'),把middleware目录里的中间件全部悉数export
+ *如这里的代码,会export.session,所以可以调用connect.session()了
+ *详细可查看lib/connect.js最后的几行fs.readdirSync()的源代码
+ *注意这里用到的readdirSync是同步阻塞执行的,
+ *所以connect=require('connect')的时候,middleware目录里的中间件都会export到connect
+*/
 ```
 
 
