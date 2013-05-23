@@ -2,6 +2,7 @@
 # Connect [源repo](https://github.com/senchalabs/connect)
 
   *这是一个在connect的master分支随便zip下来,自己新建的repo.*
+  
   *意在翻译注解和学习架构Connect框架,此工作并非针对Connect源码*
 
   Connect is an extensible HTTP server framework for [node](http://nodejs.org), providing high performance "plugins" known as _middleware_.
@@ -12,6 +13,7 @@
  Connet拥有超过20个middleware(中间件)
  
  Be sure to view the 2.x [documentation](http://senchalabs.github.com/connect/).
+ 
  你可以到[这里](http://senchalabs.github.com/connect/)了解Connect 2.0的详情
  
 ```js
