@@ -2,7 +2,6 @@
 # Connect [源repo](https://github.com/senchalabs/connect)
 
   *这是一个在connect的master分支随便zip下来,自己新建的repo.*
-  
   *意在翻译注解和学习架构Connect框架,此工作并非针对Connect源码*
   
 
