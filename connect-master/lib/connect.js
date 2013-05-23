@@ -115,6 +115,7 @@ createServer.createServer = createServer;
  * 就就有export.session,
  * 内容为require(session.js)
  * 用户就可以调用connect.session了
+ * 当然之前初始化的export.middleware,也可以用connect.middleware.session
  */
 
 fs.readdirSync(__dirname + '/middleware').forEach(function(filename){
