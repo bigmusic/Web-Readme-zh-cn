@@ -3,6 +3,12 @@
  * Copyright(c) 2010 Sencha Inc.
  * Copyright(c) 2011 TJ Holowaychuk
  * MIT Licensed
+ *
+ * 这个connect.js是整个框架的构建和初始化
+ * 它的输出既是一个函数,也是一个对象(当然函数也是一个对象)
+ * 函数最后会返回一个对象,和本身输出的这个对象
+ * 有大部分相同的方法,比如proto里面的use等
+ * 既可以用connect.proto.use,也可以app=connect()后用app.use
  */
 
 /**
@@ -40,7 +46,7 @@ exports.mime = require('./middleware/static').mime;
 
 /**
  * Expose the prototype.
- * 把proto引用到connect.proto
+ * 把proto输出到connect.proto
  */
 
 exports.proto = proto;
@@ -61,9 +67,9 @@ exports.utils = utils;
 
 /**
  * Create a new connect server.
- * 如果用户使用connect(),就返回一个函数对象
+ * 当用户调用connect(),就返回一个函数对象
  * 合并proto.js里export的属性方法,和EventEmitter的prototype到这个对象
- * 包括use,set,handle等等方法
+ * 包括use,set,handle等等和一切Node.js的事件对象原型中的属性方法
  *
  * @return {Function}
  * @api public
@@ -72,14 +78,15 @@ exports.utils = utils;
 function createServer() {
   
   //此为执行connect()返回的函数对象app,当原生http.createServer将其作为Callback调用时
-  //会执行proto.js里面定义的handle方法,同时传入req,res,next参数
+  //会执行proto.js里面定义的handle方法,
+  //同时http.createServer执行这个callback时会传入req,res,next参数
   function app(req, res, next){ app.handle(req, res, next); }  
   
   //合并proto.js里export的属性方法,和EventEmitter的prototype到app对象
   utils.merge(app, proto);
   utils.merge(app, EventEmitter.prototype);
   
-  //初始化route为'/',stack为加载middlevare的堆栈,初始化为一个数组,作为返回对象app的属性
+  //初始化route为'/',stack为加载middleware的堆栈,初始化为一个数组,作为返回对象app的属性
   app.route = '/';
   app.stack = [];
   
