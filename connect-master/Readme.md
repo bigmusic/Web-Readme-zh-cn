@@ -30,12 +30,13 @@ http.createServer(app).listen(3000);
 
 
 
-Connect的框架架构,可简单归结为以下伪代码
+
+#Connect的框架架构,可简单归结为以下伪代码
 
 ```js
 /*
  * 此为伪代码,建立一个http对象,调用createServer方法时会运行以参数传入的callback
- * 此callback是调用connect()返回的函数
+ * 此callback是调用connect()返回的函数app
 */
 var connect,
     app,
@@ -44,35 +45,59 @@ var connect,
 //http.createServer的伪代码
 http.createServer = function(callback){
     var req,res,next;
+    //此处省去N行代码,好奇的自觉去看Node.js源码
     //req=some,res=some,next=some;
     callback(req,res,next);
 };
 
 //调用connect()返回函数传值给app
-//调用createServer等待终端用户接入时,调用app函数,传入req,res,next
+//调用createServer等待终端用户接入时,调用app函数,
+//以参数传入req,res,next
 app=connect()
 http.createServer(app);
 
-//以下为connect框架思路的伪代码
 
-
-//调用connect()返回app函数,当调用app时,实质上是运行proto.js里面的handle方法
+/********注意Handle和handle的不同,源码都用handle,很混肴思路******************/
+//调用connect()返回app函数,当调用app()时,实质上是运行proto.js里面的Handle方法
 //两个重要参数为route路由参数,stack则是储存中间件(middleware)的堆栈
-//handle方法会遍历这个堆栈把中间件按顺序执行
+//堆栈stack中存放的对象,分别有route和handle,handle存的是middleware
+//而connect.Handle方法会遍历这个堆栈把中间件按顺序执行
 connect = function(){
     function app(req, res, next){
-        app.handle(req, res, next);
+        app.Handle(req, res, next);
     };
+    
+    //这里很重要的是调用utils.merge把proto.js里export的use和Handle函数合并到
+    //将要返回的app(),所以用户就可以用到app.use,app()调用时可以用到app.Handle
+    //下面会把proto.js里面的use和Handle简化成伪代码写出来
+    utils.merge(app, proto);
+    utils.merge(app, EventEmitter.prototype);
     app.route = '/';
     app.stack = [];
     return app;
 };
 
-
-//把app.use的中间件按用户的代码逻辑顺序放进stack堆栈,
-//如果调用app.use的时候有route参数,
-//这个堆栈中的对象会有一个属性对应用户想用到的middleware
-//此处为伪代码省去判断route的代码
+/******************proto.js里面的伪代码简化:*****************************/
+//  调用app.use()时,参数为中间件,如app.use(connect.session());
+//     注意:这里app.use()的参数其实是connect中间件返回的函数对象
+//          因为传入app.use的参数是connect.session()而非connect.session
+//          所以app.use里的fn接收到的是return的sessionReturn,如下伪代码
+//          connect.session = function(options){
+//              var something etc.....
+//              store.generate = function(req){...};
+//              //doSomething
+//
+//              return function sessionReturn(req, res, next){...};
+//          };
+//        
+//      所以调用connect.session()时传入如{secret:'session',cookie:{maxAge:year}}的参数,
+//      可以经过中间件的逻辑代码处理后再利用闭包让返回的函数工作
+//      实际Node.js调用的是sessionReturn()并在调用时传入req,res,next参数
+//
+//  use方法会按用户的代码逻辑顺序把中间件返回的函数逐个放进stack堆栈,
+//  如果调用app.use的时候有route参数,
+//  这个堆栈中的对象会有一个route属性对应用户想用到的路由和middleware
+//  此处为伪代码省去判断route的代码
 connect.use = function(route, fn){
     this.stack.push({
         route: route,
@@ -84,18 +109,20 @@ connect.use = function(route, fn){
 
 //此为实际调用app的内容,可观察connect函数返回的app对象
 //    function app(req, res, next){
-//        app.handle(req, res, next);
+//        app.Handle(req, res, next);
 //    };
-//调用app()时其实是在调用handle方法
+//调用app()时其实是在调用connect.Handle方法
 //这个方法会遍历调用app.use()后stack堆栈中每一个用户用到的middleware
 //按用户代码的逻辑顺序逐个运行
 //所以http.createServer调用的Callback实际上最终是调用这个函数,以调用中间件
-connect.handle = function(req, res, out){
+connect.Handle = function(req, res, out){
     var stack = this.stack,
         index = 0;
 
 //此处为伪代码,在index=0开始遍历stack[index]数组,
-//layer.handle
+//注意layer.handle,此handle非彼handle,这个handle是stack这个堆栈中的对象的方法
+//我觉得这里用handle这个名字很容易混肴connect.handle,所以我把伪代码改了改
+//用connect.Handle,注意这不是构造函数,只是为了区分
     function next(err){
         var layer;
         layer = stack[index++];
