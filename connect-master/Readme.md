@@ -4,17 +4,16 @@
   *这是一个在connect的master分支随便zip下来,自己新建的repo.*
   
   *意在翻译注解和学习架构Connect框架,此工作并非针对Connect源码*
+  
 
   Connect is an extensible HTTP server framework for [node](http://nodejs.org), providing high performance "plugins" known as _middleware_.
   Connect是一个可扩展的Node.js HTTP服务器框架,提供高性能的插件,大家都称之为中间件 _middleware_.
   
- Connect is bundled with over _20_ commonly used middleware, including
- a logger, session support, cookie parser, and [more](http://senchalabs.github.com/connect). 
- Connet拥有超过20个middleware(中间件)
- 
- Be sure to view the 2.x [documentation](http://senchalabs.github.com/connect/).
- 
- 你可以到[这里](http://senchalabs.github.com/connect/)了解Connect 2.0的详情
+  Connect is bundled with over _20_ commonly used middleware
+  Connet拥有超过20个middleware(中间件)
+
+  Be sure to view the 2.x [documentation](http://senchalabs.github.com/connect/).
+  你可以到[这里](http://senchalabs.github.com/connect/)了解Connect 2.0的详情
  
 ```js
 var connect = require('connect')
