@@ -1,14 +1,15 @@
-
 /// Serialize the a name value pair into a cookie string suitable for
 /// http headers. An optional options object specified cookie parameters
 ///
+/// 连接http/header的cookie名值对(name/value),参数对应Cookie的parameters,
+/// 如:
 /// serialize('foo', 'bar', { httpOnly: true })
 ///   => "foo=bar; httpOnly"
 ///
-/// @param {String} name
-/// @param {String} val
-/// @param {Object} options
-/// @return {String}
+/// @param {String} name   //参数name为名字
+/// @param {String} val    //参数val为值
+/// @param {Object} options //这个对象为参数
+/// @return {String}        //返回一个字符串
 var serialize = function(name, val, opt){
     var pairs = [name + '=' + encode(val)];
     opt = opt || {};
@@ -24,9 +25,12 @@ var serialize = function(name, val, opt){
 };
 
 /// Parse the given cookie header string into an object
+/// 对要处理的Cookie header解构到一个对象
+///
 /// The object has the various cookies as keys(names) => values
-/// @param {String} str
-/// @return {Object}
+/// 这个对象拥有和Cookies名值对对应的属性
+/// @param {String} str //此为Cookie header的字符串
+/// @return {Object}    //此为返回的对象
 var parse = function(str) {
     var obj = {}
     var pairs = str.split(/[;,] */);
