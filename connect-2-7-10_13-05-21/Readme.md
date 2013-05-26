@@ -179,6 +179,43 @@ proto.Handle = function(req, res, out){
 > 注意这里用到的readdirSync是同步阻塞执行的,  
 > 所以connect=require('connect')的时候,middleware目录里的中间件都会export到connect  
 
+#最后尝试写下最简单的顺序逻辑伪代码:
+```js
+http.createServer = function(callback){
+    var req, res, next;
+    //Listen the port and doSomething
+    callback(req, res, next);
+};
+http.createServer(function(req,res,next){
+    connect.session = function({secret: 'session',cookie: {maxAge: year}){
+        var options = {},
+            options.secret = arguments.secret;//....etc
+        //doSomething
+        return function sessionReturn(req, res, next){
+            //dosomething
+        };
+    };
+    myApp = connect();
+    myApp.use = function(route, connect.session())
+    {
+        this.stack.push({
+            route: route,
+            handle: function sessionReturn(req, res, next){
+                //dosomething
+            }
+        });
+    };
+
+    myApp = connect() = function(req, res, next){
+        proto.Handle = function(req, res, out){
+            this.stack.handle(req, res, next);
+        };
+        proto.Handle(req, res, next);
+    };
+    myApp(req,res,next);//go!
+});
+```
+
 
 
 ## Authors
