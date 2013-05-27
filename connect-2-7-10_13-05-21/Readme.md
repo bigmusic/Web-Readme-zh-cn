@@ -51,7 +51,7 @@ http.createServer = function(callback){
     var req, res, next;
     //此处省去N行代码,好奇的自觉去看Node.js源码
     //doSomething with req/res/next
-    callback(req, res, next); //可理解为app(req,res,next);
+    EventEmitter.on('connection', callback(req, res, next)); //callback()可理解为app(req,res,next);
 };
 ```
 
@@ -184,7 +184,7 @@ proto.Handle = function(req, res, out){
 http.createServer = function(callback){
     var req, res, next;
     //Listen the port and doSomething
-    callback(req, res, next);
+    EventEmitter.on('connection', callback(req, res, next));
 };
 http.createServer(function(req,res,next){
     connect.session = function({secret: 'session',cookie: {maxAge: year}){
