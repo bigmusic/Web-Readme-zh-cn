@@ -1,35 +1,40 @@
-WebSocket-Node includes both client and server functionality, available through WebSocketClient and WebSocketServer respectively.  Once a connection is established, the API for sending and receiving messages is identical whether you're acting as a client or server.
+WebSocket-Node includes both client and server functionality, available through WebSocketClient and WebSocketServer respectively.  Once a connection is established, the API for sending and receiving messages is identical whether you're acting as a client or server.  
+WebSocket-Node 是一个Node.js的依赖包,其可以创建基于WebSocket的服务器或者客户端,建立后连接不会中断,发送和接收信息的API在服务器端或者客户端都是一样的.
 
-WebSocketServer
-===============
+WebSocketServer - 服务器端
+==========================
 
 `var WebSocketServer = require('websocket').server`
 
-Constructor
------------
+Constructor - 构造函数
+----------------------
 
 ```javascript
 new WebSocketServer([serverConfig]);
 ```
 
-Methods
--------
+Methods - 方法
+--------------
 
 ###mount(serverConfig)
 
-`mount` will attach the WebSocketServer instance to a Node http.Server instance. `serverConfig` is required, and is an object with configuration values.  For those values, see **Server Config Options** below.  If you passed `serverConfig` to the constructor, this function will automatically be invoked.
+`mount` will attach the WebSocketServer instance to a Node http.Server instance. `serverConfig` is required, and is an object with configuration values.  For those values, see **Server Config Options** below.  If you passed `serverConfig` to the constructor, this function will automatically be invoked.  
+`mount` 将一个WebSocketServer的实例传入Node的http.Server实例,`serverConfig`参数是必须的,它是一个有详细配置值的对象.详细配置值的定义,可以参考下面的 **Server Config Options** .如果你将`serverconfig`传入构造函数,构造函数会自动处理这个值.  
 
 ###unmount()
 
-`unmount` will detach the WebSocketServer instance from the Node http.Server instance.  All existing connections are left alone and will not be affected, but no new WebSocket connections will be accepted.
+`unmount` will detach the WebSocketServer instance from the Node http.Server instance.  All existing connections are left alone and will not be affected, but no new WebSocket connections will be accepted.  
+`unmount` 会把WebSocketServer的实例从node的httpServer实例中删除,所有的连接会被孤立,而且不能操作这些连接.新的WebSocket连接也不会被接受.  
 
 ###closeAllConnections()
 
-Will gracefully close all open WebSocket connections.
+Will gracefully close all open WebSocket connections.  
+会优雅地断开所有WebSocket连接.  
 
 ###shutDown()
 
-Gracefully closes all open WebSocket connections and unmounts the server from the Node http.Server instance.
+Gracefully closes all open WebSocket connections and unmounts the server from the Node http.Server instance.  
+优雅地断开所有连接,并删除http.Server实例中的WebSocketServer实例.  
 
 Server Config Options
 ---------------------
@@ -72,24 +77,28 @@ The number of milliseconds to wait after sending a close frame for an acknowledg
 **disableNagleAlgorithm** - boolean - *Default: true*  
 The Nagle Algorithm makes more efficient use of network resources by introducing a small delay before sending small packets so that multiple messages can be batched together before going onto the wire.  This however comes at the cost of latency, so the default is to disable it.  If you don't need low latency and are streaming lots of small messages, you can change this to 'false';
 
-Events
-------
-There are three events emitted by a WebSocketServer instance that allow you to handle incoming requests, establish connections, and detect when a connection has been closed.
+Events - 事件
+-------------
+There are three events emitted by a WebSocketServer instance that allow you to handle incoming requests, establish connections, and detect when a connection has been closed.  
+WebSocketServer有三个待触发的事件,能分别处理 **请求** **建立连接** **侦察连接的断开**  
 
 ###request
 `function(webSocketRequest)`
 
-If `autoAcceptConnections` is set to `false`, a `request` event will be emitted by the server whenever a new WebSocket request is made.  You should inspect the requested protocols and the user's origin to verify the connection, and then accept or reject it by calling webSocketRequest.accept('chosen-protocol', 'accepted-origin') or webSocketRequest.reject()
+If `autoAcceptConnections` is set to `false`, a `request` event will be emitted by the server whenever a new WebSocket request is made.  You should inspect the requested protocols and the user's origin to verify the connection, and then accept or reject it by calling webSocketRequest.accept('chosen-protocol', 'accepted-origin') or webSocketRequest.reject()  
+如果 `autoAccpetConnections` 被设置到 `false` ,一个 `request` 事件会被一个新的WebSocket请求触发. 你应该检查请求协议即 **requested protocols** 和用户来源即 **user's origin** 以验证连接的合法性.然后调用 `webSocketRequest.accept('chosen-protocol','accepted-origin')`来允许连接,或用`webSocketRequest.reject()`来拒绝连接.  
 
 ###connect
 `function(webSocketConnection)`
 
-If `autoAcceptConnections` is set to `true`, a `connect` event will be emitted by the server when a new WebSocket request is made.  The server automatically accepts all connections, so the `connect` event will pass the established WebSocketConnection object.  *This should only be used in extremely simplistic test servers etc. for security reasons, as it will accept connections from any source domain.*
+If `autoAcceptConnections` is set to `true`, a `connect` event will be emitted by the server when a new WebSocket request is made.  The server automatically accepts all connections, so the `connect` event will pass the established WebSocketConnection object.  *This should only be used in extremely simplistic test servers etc. for security reasons, as it will accept connections from any source domain.*  
+如果 `autoAcceptConnections` 设置为 `true` ,一个 `connect` 事件会被一个新的WebSocket请求触发.但服务器会自动接受所有连接请求,所以 `connect`时间会长期持久地调用 `WebSocketConnection` 对象. *基于安全原因,强烈建议这个事件只用在极其简单的测试型服务器或者开发环境中,因为这个事件会接受所有域的所有连接.*  
 
 ###close
 `function(webSocketConnection, closeReason, description)`
 
-Whenever a connection is closed for any reason, the WebSocketServer instance will emit a `close` event, passing a reference to the WebSocketConnection instance that was closed.  `closeReason` is the numeric reason status code for the connection closure, and `description` is a textual description of the close reason, if available.
+Whenever a connection is closed for any reason, the WebSocketServer instance will emit a `close` event, passing a reference to the WebSocketConnection instance that was closed.  `closeReason` is the numeric reason status code for the connection closure, and `description` is a textual description of the close reason, if available.  
+当一个连接因为任何原因断开,`WebSocketServer` 实例都会触发 `close` 事件,并对相应关闭的`WebSocketConnection`实例给出一个参考值-- `closeReason` ,它是一个连接断开的状态码.还有 `description` ,如果可能,它的内容会是描述连接断开原因的文本.  
 
 
 WebSocketRequest
