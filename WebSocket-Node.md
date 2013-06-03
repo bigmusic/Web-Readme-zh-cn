@@ -113,7 +113,7 @@ This object is created internally by `WebSocketServer`.
 
 However if you need to integrate WebSocket support without mounting an instance of `WebSocketServer` to your http server directly, you can handle the `upgrade` event yourself and pass the appropriate parameters to the `WebSocketRequest` constructor.  **NOTE:** You *must* pass a complete set of config options to the constructor.  See the section *'Server Config Options'* above.  The only option that isn't required in this context is `httpServer`.  
 然而,如果你需要除去创建`WebSocketServer`的实例直接独立地编写 `WebSocket`服务器,你可以自己处理 `upgrade` 事件并传入适当的参数给构造函数`WebSocketRequest`.  
-**注意:** 你*必须*传入一个完整的设置参数给构造函数`WebSocketRequest`,详细可以参考上面的**Server Config Options** ,在这个情况下,唯一不需要的选项只有`httpServer`.
+**注意:** 你 *必须* 传入一个完整的设置参数给构造函数`WebSocketRequest`,详细可以参考上面的**Server Config Options** ,在这个情况下,唯一不需要的选项只有`httpServer`.
 
 ```javascript
 new WebSocketRequest(socket, httpRequest, config);
