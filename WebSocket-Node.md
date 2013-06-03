@@ -103,13 +103,17 @@ Whenever a connection is closed for any reason, the WebSocketServer instance wil
 
 WebSocketRequest
 ================
-This object represents a client requesting to connect to the server, and allows you to accept or reject the connection based on whatever criteria you decide.
+This object represents a client requesting to connect to the server, and allows you to accept or reject the connection based on whatever criteria you decide.  
+这个对象在一个客户端请求连接到服务器时创建,允许你基于自定义规则选择接受还是拒绝连接.
 
-Constructor
------------
-This object is created internally by `WebSocketServer`.
+Constructor - 构造函数
+----------------------
+This object is created internally by `WebSocketServer`.  
+这个对象是 `WebSocketServer` 内部建立的.
 
-However if you need to integrate WebSocket support without mounting an instance of `WebSocketServer` to your http server directly, you can handle the `upgrade` event yourself and pass the appropriate parameters to the `WebSocketRequest` constructor.  **NOTE:** You *must* pass a complete set of config options to the constructor.  See the section *'Server Config Options'* above.  The only option that isn't required in this context is `httpServer`.
+However if you need to integrate WebSocket support without mounting an instance of `WebSocketServer` to your http server directly, you can handle the `upgrade` event yourself and pass the appropriate parameters to the `WebSocketRequest` constructor.  **NOTE:** You *must* pass a complete set of config options to the constructor.  See the section *'Server Config Options'* above.  The only option that isn't required in this context is `httpServer`.  
+然而,如果你需要除去创建`WebSocketServer`的实例直接独立地编写 `WebSocket`服务器,你可以自己处理 `upgrade` 事件并传入适当的参数给构造函数`WebSocketRequest`.  
+**注意:** 你*必须*传入一个完整的设置参数给构造函数`WebSocketRequest`,详细可以参考上面的**Server Config Options** ,在这个情况下,唯一不需要的选项只有`httpServer`.
 
 ```javascript
 new WebSocketRequest(socket, httpRequest, config);
