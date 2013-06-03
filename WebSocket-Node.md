@@ -469,4 +469,66 @@ Emitted upon successfully negotiating the WebSocket handshake with the remote se
 ###connectFailed
 `function(errorDescription)`
 
-Emitted when there is an error connecting to the remote host or the handshake response sent by the server is invalid.
+Emitted when there is an error connecting to the remote host or the handshake response sent by the server is invalid.  
+
+WebSocketServer伪代码
+---------------------
+```js
+var WebSocketServer = function WebSocketServer(config){
+    this.mount(config);
+};
+
+WebSocketServer.prototype.mount = function(config){
+    this.config = {//config
+    };
+    this.config.httpServer.on('upgrade', this.handleUpgrade);//upgrade pass 'request' 'socket' instance
+};
+
+WebSocketServer.prototype.handleUpgrade = function(request, socket){
+    var wsRequest = new WebSocketRequest(socket, request, this.config);
+    wsRequest.readHandshake();
+    wsRequest.once('requestAccepted', function(wsConnection){
+        var self = this;
+        wsConnection.once('close', function(closeReason, description){
+            wsRequest.handleConnectionClose(wsConnection, closeReason, description);
+        });
+        wsRequest.connections.push(wsConnection);
+    });
+    this.emit('request', wsRequest);
+};
+
+function WebSocketRequest(socket, httpRequest, serverConfig) {
+    this.socket = socket;
+    this.httpRequest = httpRequest;
+    this.resource = httpRequest.url;
+    this.remoteAddress = socket.remoteAddress;
+    this.serverConfig = serverConfig;
+};
+
+WebSocketRequest.accept = function(acceptedProtocol, allowedOrigin){
+    var wsConnection = new WebSocketConnection(this.socket, [], acceptedProtocol, false, this.serverConfig);
+    wsConnection.webSocketVersion = this.webSocketVersion;
+    wsConnection.remoteAddress = this.remoteAddress;
+
+    var acceptKey = crypto.createHash('sha1').update(this.key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest('base64');
+    var response = "HTTP/1.1 101 Switching Protocols\r\n" +
+                   "Upgrade: websocket\r\n" +
+                   "Connection: Upgrade\r\n" +
+                   "Sec-WebSocket-Accept: " + acceptKey + "\r\n" +
+                   "Sec-WebSocket-Protocol: " + acceptedProtocol + "\r\n" +
+                   "Origin: " + allowedOrigin + "\r\n";
+    this.socket.write(response, 'ascii');
+    this.emit('requestAccepted', wsConnection);
+    return wsConnection;
+};
+
+var wsServer = new WebSocketServer(config);
+wsServer.on('request', function(wsRequest){
+    var wsConnection = wsRequest.accept('big-protocol', wsRequest.origin);
+    wsConnection.on('message', function(message){
+        wsConnection.sendUTF(message.utf8Data);
+    });
+    wsConnection.on('close', function(reasonCode, description){
+    });
+});
+```
